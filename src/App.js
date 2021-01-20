@@ -51,7 +51,12 @@ class App extends Component {
           })
         : allTasks;
 
-    const tasks = paginate(filteredTasks, currentPage, pageSize);
+    const sortedTasks = filteredTasks.sort((a, b) => {
+      return a.task.localeCompare(b.task); // sort ascending
+      // return b.task.localeCompare(a.task); // sort descending
+    });
+
+    const tasks = paginate(sortedTasks, currentPage, pageSize);
 
     return (
       <div className="row">
