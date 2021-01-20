@@ -2,10 +2,14 @@ import React, { Component } from 'react';
 import Pagination from './components/Pagination.jsx';
 import { paginate } from './utils/paginate.js';
 import TasksTable from './components/TasksTable';
+import ListGroup from './components/ListGroup.jsx';
+
 class App extends Component {
   state = {
     tasks: [],
-    pageSize: 5,
+    taskGroups: ['All Tasks', 'Incomplete', 'Completed'],
+    selectedGroup: 'All Tasks',
+    pageSize: 8,
     currentPage: 1,
   };
 
@@ -25,19 +29,48 @@ class App extends Component {
     this.setState({ currentPage: page });
   };
 
+  handleGroupSelect = (group) => {
+    this.setState({ selectedGroup: group, currentPage: 1 });
+  };
+
   render() {
-    const { tasks: allTasks, pageSize, currentPage } = this.state;
-    const tasks = paginate(allTasks, currentPage, pageSize);
+    const {
+      tasks: allTasks,
+      pageSize,
+      currentPage,
+      taskGroups,
+      selectedGroup,
+    } = this.state;
+
+    const filteredTasks =
+      selectedGroup !== 'All Tasks'
+        ? allTasks.filter((task) => {
+            return selectedGroup === 'Completed'
+              ? task.completed
+              : !task.completed;
+          })
+        : allTasks;
+
+    const tasks = paginate(filteredTasks, currentPage, pageSize);
 
     return (
-      <div className="container">
-        <TasksTable tasks={tasks} />
-        <Pagination
-          itemCount={allTasks.length}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={this.handlePageChange}
-        />
+      <div className="row">
+        <div className="col-3">
+          <ListGroup
+            groups={taskGroups}
+            selectedGroup={selectedGroup}
+            onGroupSelect={this.handleGroupSelect}
+          />
+        </div>
+        <div className="col">
+          <TasksTable tasks={tasks} />
+          <Pagination
+            itemCount={filteredTasks.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={this.handlePageChange}
+          />
+        </div>
       </div>
     );
   }
